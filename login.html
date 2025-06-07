@@ -1,0 +1,104 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập / Đăng Ký</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+    <script src="script.js"></script>
+</head>
+<body>
+    <div class="container login-container" id="container">
+        <div class="form-container sign-up">
+            <form>
+                <h1>Tạo tài khoản</h1>
+                <div class="social-icons">
+                     <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                    <a href="nb6761315@gmail.com" class="icon"><i class="fa-regular fa-envelope"></i></a>
+                    <a href="https://www.facebook.com/BaongoG" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://github.com/G-b-ngoc/" class="icon"><i class="fa-brands fa-github"></i></a>
+                    <a href="0865517620" class="icon"><i class="fa-solid fa-circle-user"></i></a>
+                </div>
+                <span>hoặc sử dụng email của bạn để đăng ký</span>
+                <input type="text" placeholder="Họ và tên">
+                <input type="email" placeholder="Email">
+                <input type="password" placeholder="Mật khẩu">
+                <button type="submit">Đăng ký</button>
+            </form>
+        </div>
+        <div class="form-container sign-in">
+            <form>
+                <h1>Đăng Nhập</h1>
+                <div class="social-icons">
+                     <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+                    <a href="nb6761315@gmail.com" class="icon"><i class="fa-regular fa-envelope"></i></a>
+                    <a href="https://www.facebook.com/BaongoG" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://github.com/G-b-ngoc/" class="icon"><i class="fa-brands fa-github"></i></a>
+                    <a href="0865517620" class="icon"><i class="fa-solid fa-circle-user"></i></a>
+                </div>
+                <span>hoặc sử dụng mật khẩu email của bạn</span>
+                <input type="email" placeholder="Email">
+                <input type="password" placeholder="Mật khẩu">
+                <a href="#">Quên Mật Khẩu?</a>
+                <button type="submit">Đăng Nhập</button>
+            </form>
+        </div>
+        <div class="toggle-container">
+            <div class="toggle">
+                <div class="toggle-panel toggle-left">
+                    <h1>welcome back!</h1>
+                    <p>Nhập thông tin cá nhân của bạn để sử dụng tất cả các tính năng của trang web</p>
+                    <button class="hidden" id="login">Đăng Nhập</button>
+                </div>
+                <div class="toggle-panel toggle-right">
+                    <h1>CHÀO BẠN!</h1>
+                    <p>Đăng ký thông tin cá nhân của bạn để sử dụng tất cả các tính năng của trang web</p>
+                    <button class="hidden" id="register">Đăng Ký</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
